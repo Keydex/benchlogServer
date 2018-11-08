@@ -29,6 +29,11 @@ function helper_memUsage(memoryData){
   let maxMemory = -1;
   let totalMemory = 0;
   let tmpVal = -1;
+  console.log('LENGTH OF MEMORY DATA' + memoryData.length)
+  console.log(memoryData);
+  if(memoryData.length == 3){
+    return [Math.round(memoryData[0]), Math.round(memoryData[0])]
+  }
   for (i in memoryData){
     tmpVal = parseInt(memoryData[i]);
     totalMemory += tmpVal;
@@ -39,6 +44,25 @@ function helper_memUsage(memoryData){
   console.log(totalMemory)
   //Convert to MB
   return [Math.round(maxMemory/1000000), Math.round((totalMemory/1000000)/memoryData.length)]
+}
+/*
+
+Return: [AvgUsage]
+*/
+function helper_avgUsage(memoryData){
+  let totalUsage = 0;
+  let tmpVal = -1;
+  console.log('LENGTH OF MEMORY DATA' + memoryData.length)
+  console.log(memoryData);
+  if(memoryData.length == 3){
+    return [Math.round(memoryData[0])]
+  }
+  for (i in memoryData){
+    tmpVal = parseInt(memoryData[i]);
+    totalUsage += tmpVal;
+  }
+  //Convert to MB
+  return [Math.round(totalUsage/memoryData.length)]
 }
 
 function helper_cpuUsage(memoryData, cores){
@@ -57,10 +81,27 @@ function db_saveData(data){
   infoMemory = helper_memUsage(data.infoMemoryUsage);
   dataMaxMem = infoMemory[0];
   dataAvgMem = infoMemory[1];
-  jsonData = {test:'testvariable'};
+  jsonData = {}
+  jsonData.runTime = JSON.stringify(data.infoRunTime)
+  jsonData.cpuUsage = JSON.stringify(data.infoCpuUsage)
+  jsonData.memoryUsage = JSON.stringify(data.infoMemoryUsage)
+  jsonData.progress = JSON.stringify(data.infoProgress)
+  if(data.gpuName != undefined){
+    jsonData.gpuMemUsage = JSON.stringify(data.infoGpuMemUtil)
+    jsonData.gpuUsage = JSON.stringify(data.infoGpuUsage)
+    jsonData.gpuMemUtil = JSON.stringify(data.infoGpuMemUtil)
+    jsonData.gpuUUID = data.gpuUUID
+    jsonData.gpuDriver = data.gpuDriver
+  }
   jsonData = JSON.stringify(jsonData);
   dataCPU = helper_cpuUsage(data.infoCpuUsage, data.cores);
-  const newProject = {projectName: dataName, features: dataFeatures, runtime:dataRunTime, avgMem:dataAvgMem, maxMem:dataMaxMem, cpuUsage:dataCPU, data:jsonData};
+  let newProject = {projectName: dataName, features: dataFeatures, runtime:dataRunTime, avgMem:dataAvgMem, maxMem:dataMaxMem, cpuUsage:dataCPU, data:jsonData};
+  if(data.gpuName != undefined){
+    newProject.gpuName = data.gpuName
+    newProject.avgGpuMem = helper_memUsage(data.infoGpuMemUsage)[1];
+    newProject.avgGpuUsage = helper_avgUsage(data.infoGpuUsage)[0];
+    newProject.avgGpuMemUtil = helper_avgUsage(data.infoGpuMemUtil)[0];
+  }
   connection.query('INSERT INTO projectLog SET ? ', newProject ,function (error, results, fields) {
     if (error) throw error;
     console.log('result inserted');
