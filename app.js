@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 const mysql = require('mysql');
+const path = require('path');
 require('dotenv').config()
 
 const bodyParser = require('body-parser')
@@ -9,6 +10,8 @@ app.use( bodyParser.json() );
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+app.use(express.static(path.join(__dirname, 'public')))
 
 var connection = mysql.createConnection({
   host     : process.env.host,
@@ -46,6 +49,7 @@ Save data to database
 
 
 */
+connection.connect();
 function db_saveData(data){
   dataName = data.projectName;
   dataFeatures = JSON.stringify(data.features);
@@ -53,14 +57,14 @@ function db_saveData(data){
   infoMemory = helper_memUsage(data.infoMemoryUsage);
   dataMaxMem = infoMemory[0];
   dataAvgMem = infoMemory[1];
+  jsonData = {test:'testvariable'};
+  jsonData = JSON.stringify(jsonData);
   dataCPU = helper_cpuUsage(data.infoCpuUsage, data.cores);
-  const newProject = {projectName: dataName, features: dataFeatures, runtime:dataRunTime, avgMem:dataAvgMem, maxMem:dataMaxMem, cpuUsage:dataCPU};
-  connection.connect();
+  const newProject = {projectName: dataName, features: dataFeatures, runtime:dataRunTime, avgMem:dataAvgMem, maxMem:dataMaxMem, cpuUsage:dataCPU, data:jsonData};
   connection.query('INSERT INTO projectLog SET ? ', newProject ,function (error, results, fields) {
     if (error) throw error;
     console.log('result inserted');
   });
-  connection.end();
   console.log(newProject);
   return;
 }
