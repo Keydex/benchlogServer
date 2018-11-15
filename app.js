@@ -3,6 +3,7 @@ const app = express()
 const port = 3000
 const mysql = require('mysql');
 const path = require('path');
+const util = require('util')
 require('dotenv').config()
 
 const bodyParser = require('body-parser')
@@ -68,12 +69,26 @@ function helper_avgUsage(memoryData){
 function helper_cpuUsage(memoryData, cores){
   return -2;
 }
+
+var getResults = (results) => {
+  connection.query('SELECT * FROM projectLog' ,function (error, results, fields) {
+    if (error){
+      throw error;
+    };
+    console.log('result inserted');
+    console.log(results)
+    return(results)
+  });
+  return -1;
+}
+
 /*
 Save data to database
 
 
 */
 connection.connect();
+getResults();
 function db_saveData(data){
   dataName = data.projectName;
   dataFeatures = JSON.stringify(data.features);
@@ -110,12 +125,10 @@ function db_saveData(data){
   return;
 }
 
-function db_getProjectIDs(){
-  return -1;
-}
-
 
 app.get('/', (req, res) => res.send('Hello World!'))
+
+app.get('/data', (req,res) => res.send(get_projects()))
 
 app.get('/projectIDs', (req, res) => {
   //Send list of projectIDs
