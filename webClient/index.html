@@ -1,6 +1,174 @@
 <html>
 
-<p>Hello World</p>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <title>BenchLog Visualization</title>
+</head>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<style>
+html,body{
+  background-color:lightgrey;
+  height: 100%;
+  width: 100%;
+}
+
+.dropdown{
+  max-height: 30%;
+  overflow-y: auto;
+}
+
+tr{
+  cursor: default;
+}
+
+a:hover{
+  cursor: pointer;
+}
+.btn-width{
+  width: 200px;
+}
+
+.selectTable:hover{
+  background-color:darkgrey;
+  cursor: pointer;
+}
+
+.selectTable:active{
+  background-color:grey;
+  cursor: pointer;
+}
+
+</style>
+
+<body>
+  <nav class="navbar navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">BenchLog Vis</span>
+  </nav>
+
+
+  <div class="container">
+    <h2>Select project</h2>
+    <div class="row">
+      <div class="col-sm">
+        Project:
+        <button id="dropdownButton" class="btn btn-width btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Select A Project
+        </button>
+        <div id="dropdownList" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        </div>
+      </div>
+    </div>
+  </br>
+  <div class="container dropdown">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Features</th>
+            <th scope="col">Runtime</th>
+            <th scope="col">Accuracy</th>
+            <th scope="col">avgMemory</th>
+            <th scope="col">avgCPU</th>
+            <th scope="col">avgGPU</th>
+            <th scope="col">avgGPUMem</th>
+            <th scope="col">avgGPUMemUtil</th>
+          </tr>
+        </thead>
+          <tbody id="dataRow">
+          </tbody>
+        </div>
+      </table>
+  </div>
+</body>
+
+<script>
+
+
+let selectedProject = '';
+function selectProject(info, projectName){
+
+  return cutArray;
+}
+function populateChart(info){
+  tempHTML = ''
+  for (x of info){
+    if(x.features == null){
+      x.features = 'None';
+    }
+    if(x.cpuUsage < 0 || x.cpuUsage == null){
+      x.cpuUsage = ''
+    }
+    if(x.avgGpuUsage < 0 || x.avgGpuUsage == null){
+      gpuUsage = ''
+    }else{
+      gpuUsage = x.avgGpuUsage + '%'
+    }
+    if(x.avgGpuMem < 0 || x.avgGpuMem == null){
+      avgGpuMem = ''
+    }else{
+      avgGpuMem = x.avgGpuMem + '%'
+    }
+    if(x.avgGpuMemUtil < 0 || x.avgGpuMemUtil == null){
+      avgGpuMemUtil = ''
+    }else{
+      avgGpuMemUtil = x.avgGpuMemUtil + '%'
+    }
+    if(x.accuracy == null){
+      x.accuracy = ''
+    }
+    tempHTML += '<tr onClick("test()") id="table_'+x.benchID+'"class="selectTable"><th scope="row">' + x.benchID + '</th>'
+    tempHTML += '<td>' + x.features + '</td>'
+    tempHTML += '<td>' + x.runTime + 's</td>'
+    tempHTML += '<td>' + x.accuracy + '</td>'
+    tempHTML += '<td>' + x.avgMem + 'MB</td>'
+    tempHTML += '<td>' + x.cpuUsage + '</td>'
+    tempHTML += '<td>' + gpuUsage + '</td>'
+    tempHTML += '<td>' + avgGpuMem + '</td>'
+    tempHTML += '<td>' + avgGpuMemUtil + '</td></tr>'
+  }
+  $("#dataRow").empty().append(tempHTML)
+  console.log('adding info to chart');
+}
+function populateProject(){
+  let projectNames = new Set();
+  let dropDownHtml = ''
+  for (x of data){
+    projectNames.add(x.projectName)
+  }
+  for (x of projectNames){
+    dropDownHtml += "<a class='dropdown-item' onClick='selectProject(\""+x+"\")' id='dropDown_" + x + "'>" + x + "</a>"
+  }
+  $("#dropdownList").append(dropDownHtml);
+}
+function selectProject(name){
+  $("#dropdownButton").empty().append(name);
+  const cutArray = [];
+  for(x of data){
+    if(x.projectName == name){
+      cutArray.push(x);
+    }
+  }
+  populateChart(cutArray);
+  console.log('Selecting ' + name)
+}
+
+function test(){
+  console.log('test worked')
+}
+populateProject()
+
+console.log(data);
+
+</script>
 
 </html>

@@ -126,7 +126,9 @@ function db_saveData(data){
 }
 
 
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/webClient/index.html'));
+});
 
 app.get('/data', (req,res) => res.send(get_projects()))
 
