@@ -14,6 +14,8 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js" integrity="sha256-qNzZal0keStZ8CLwnu0Fxs+6BGnD5tpk4D1BevFGQDQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js" integrity="sha256-MZo5XY1Ah7Z2Aui4/alkfeiq3CopMdV/bbkc/Sh41+s=" crossorigin="anonymous"></script>
 
 <style>
 html,body{
@@ -89,10 +91,12 @@ a:hover{
         </div>
       </table>
   </div>
+  <div class="container">
+    <canvas id="myChart" width="90%" height="40%"></canvas>
+  </div>
 </body>
 
 <script>
-
 
 let selectedProject = '';
 function selectProject(info, projectName){
@@ -126,7 +130,7 @@ function populateChart(info){
     if(x.accuracy == null){
       x.accuracy = ''
     }
-    tempHTML += '<tr onClick("test()") id="table_'+x.benchID+'"class="selectTable"><th scope="row">' + x.benchID + '</th>'
+    tempHTML += '<tr onClick="test('+x.benchID+')" id="table_'+x.benchID+'"class="selectTable"><th scope="row">' + x.benchID + '</th>'
     tempHTML += '<td>' + x.features + '</td>'
     tempHTML += '<td>' + x.runTime + 's</td>'
     tempHTML += '<td>' + x.accuracy + '</td>'
@@ -162,8 +166,51 @@ function selectProject(name){
   console.log('Selecting ' + name)
 }
 
-function test(){
-  console.log('test worked')
+
+function stringToArray(obj){
+  let newObj = JSON.parse(obj.data);
+  console.log(newObj);
+  for(var property in newObj){
+    try{
+      newObj[property] = JSON.parse(newObj[property]).map(Number);
+    }catch(error) {
+      console.info('Property ' + property + ' does not exist in object.')
+    }
+  }
+  return newObj;
+}
+function test(benchID){
+  let obj = data.find(x => x.benchID === benchID)
+  info = stringToArray(obj)
+  drawGraph(info, obj.projectName, benchID);
+}
+
+function drawGraph(obj,projectName, benchID){
+  console.log("attempting to draw graph")
+  var ctx = document.getElementById("myChart").getContext('2d');
+  console.log(obj);
+  if(!Array.isArray(obj.runTime) || !Array.isArray(obj.memoryUsage)){
+    console.error('Object only has one datapoint, cannot plot')
+    return
+  }
+  var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: obj.runTime,
+      datasets: [{
+          data: obj.memoryUsage,
+          label: 'Memory',
+          borderColor: "#3e95cd",
+          fill: false
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Project ' + projectName + ' #' + benchID
+      }
+    }
+  });
 }
 populateProject()
 
